@@ -13,7 +13,8 @@ This is a little summer vacation project and won't go anywhere. I hope someone w
 
 * Each part consists of 2 digits for armor and IDs for the items, each with a `|` prefix
   * Digits are in base 64 from '0' to 'o' on the ASCII table (basically `x.charCodeAt(0) - "0".charCodeAt(0)`). The ids are also in "least significant digit first notation", so `>1` <=> `1>` = `1*64^1 + ">"*64^0` = `78`
-* a character is used to map armor and ids to the given part 
+  * ID's are also in base 64 and can be checked on the website. `2@` would be `2*1 + ("@".code - "0".cod)*64 = 2 + 1024`
+* a character is used to map armor and ids to the given part (since character codes "a" - "o" are used for the base 65 encoding)
   * `p` Center Torso
   * `q` Right Torso
   * `r` Left Torso

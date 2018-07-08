@@ -1,10 +1,9 @@
 # mwo-parse-export
+This is mainly to give a start. This was intended to be made available for smurfy's mechlab.
 
-FIXME: description
+## explanation
 
-## Installation
-
-Download from http://example.com/FIXME.
+TODO!
 
 ## Usage
 
@@ -23,10 +22,6 @@ FIXME: listing of options this app accepts.
 ### Bugs
 
 ...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 

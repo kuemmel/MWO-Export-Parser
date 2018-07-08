@@ -7,14 +7,24 @@ This is a little summer vacation project and won't go anywhere. I hope someone w
 
 # Explanation
 ## Export Strings in MWO
+```
+Ab300220p20q20|2@|2@r20s20t20u20v20w000000
+^        ^     ^      ^              ^  
+| Mech ID|     |      |              |  
+         | Part character (p - w)    |  
+               | Item prefix with 2 places for the item ID in base 64 belonging to `r` (left torso)  
+                      | armor value in base 64 ASCII code of `x - '0'` from '0' to 'o' belonging to `t` (right arm) 
+                                     | last 6 places for the rear right, left and center torso  
+```
+
 * The strings consist of the mech id (first 4-6 places, for example `Avb3000`) and
 * a list of parts with armor and items `20p20q40|2@|2@|2@r20s20t20u20v20w2030:0`
 
 
-* Each part consists of 2 digits for armor and IDs for the items, each with a `|` prefix
+* A part consists of 2 digits for armor and IDs for the items, each with a `|`
   * Digits are in base 64 from '0' to 'o' on the ASCII table (basically `x.charCodeAt(0) - "0".charCodeAt(0)`). The ids are also in "least significant digit first notation", so `>1` <=> `1>` = `1*64^1 + ">"*64^0` = `78`
-  * ID's are also in base 64 and can be checked on the website. `2@` would be `2*1 + ("@".code - "0".cod)*64 = 2 + 1024`
-* a character is used to map armor and ids to the given part (since character codes "a" - "o" are used for the base 65 encoding)
+  * the ids can be pulled from the game files or the smurfys api. `2@` would be `2*1 + ("@".code - "0".cod)*64 = 2 + 1024` which is the lrm 5 launcher
+* a character is used at the end of each part to map armor and ids to the it (since character codes "a" - "o" are used for the base 64 encoding)
   * `p` Center Torso
   * `q` Right Torso
   * `r` Left Torso
@@ -25,11 +35,12 @@ This is a little summer vacation project and won't go anywhere. I hope someone w
   * `w` Head
   *  the rear armor is represented by a string of six places at the end representing right, left and center torso
 
-## Example`s
+## Examples
 * `90s` -> 9 armor in the left arm
 * `01s` -> 63 armor in the left arm
 * `>1p` -> 78 armor in the center torso
 * `>1|2@r` -> 78 armor in the left torso with an LRM 5.
+* `>1|2@r|2@r` -> 78 armor in the left torso with 2 LRM 5s.
 * `20w2030:0` -> 2 armor in the head, 2 armor in the right torso, 3 in the left and ten (`:0`) in the center torso 
 ## Some complete example strings
 * `Ab300000p00q00r00s00t00u00v00w000000` Empty centurion CN9-AH 

@@ -1,7 +1,8 @@
 (ns mwo-parse-export.core
   (:gen-class)
   (:require [clojure.math.numeric-tower :as math]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [mwo-parse-export.convert :as convert]))
 
 ;; TODO parser into own file
 ;; TODO threading macros (->)
@@ -29,24 +30,12 @@
 (def REAR_CENTER_TORSO {:place 11 :character nil :short-name "rct" :name "Rear Center Torso"}) ;last place after head
 
 (def PARTS
-  [CENTER_TORSO RIGHT_TORSO LEFT_TORSO LEFT_ARM RIGHT_ARM LEFT_LEG RIGHT_LEG HEAD REAR_CENTER_TORSO REAR_LIGHT_TORSO REAR_RIGHT_TORSO])
+  [CENTER_TORSO RIGHT_TORSO LEFT_TORSO LEFT_ARM RIGHT_ARM LEFT_LEG RIGHT_LEG HEAD REAR_CENTER_TORSO REAR_LEFT_TORSO REAR_RIGHT_TORSO])
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (println "Hello, World!"))
-
-(defn base64-digit->base10 [digit]
-  (- (if (char? digit) (int digit) (int (first (char-array digit)))) (int \0)))
-
-(defn base64->base10 [num]
-  (let [BASE 64
-        chars   (char-array num)
-        indices (range 0 (count chars))
-        convert-digit-and-zip (fn [digit range-digit] (vector (base64-digit->base10 digit) range-digit))]
-    (reduce (fn [number digit-with-place] (+ number (* (first digit-with-place) (math/expt BASE (second digit-with-place)))))
-            0
-            (map convert-digit-and-zip chars indices))))
 
 (defn get-part-of [part-character]
   (first (filter (fn [part] (= part-character (:character part))) PARTS)))
@@ -58,13 +47,13 @@
   (let [chars (char-array part-string)
         part-character (last chars)
         item-string (subs part-string 2 (- (count part-string) 1))
-        armor-value (base64->base10 (first item-string))
+        armor-value (convert/base64->base10 (first item-string))
         items (get-items (rest item-string))
         part (get-part-of part-character)]
     (assoc part ARMOR armor-value ITEMS items)))
 
 (defn get-rear-armor [rear-string]
-  (let [armor-values (map (fn [x] (base64->base10 x)) (re-seq #".{2}" rear-string))
+  (let [armor-values (map (fn [x] (convert/base64->base10 x)) (re-seq #".{2}" rear-string))
         rrt (assoc REAR_CENTER_TORSO ARMOR (first armor-values))
         rlt (assoc REAR_LEFT_TORSO ARMOR (second armor-values))
         rct (assoc REAR_CENTER_TORSO ARMOR (last armor-values))]
@@ -72,10 +61,11 @@
 
 ;; test data max armor  Af1828X1p41q41rh0sh0tb0ub0v:0w404040
 (defn parse-string [mech-string]
-  (let [mech-id (take 6 mech-string)
-        part-string (subs mech-string 6)
-        part-strings (str/split part-string #"(?<=[p-w])")
-        front-parts (map part-string->part (drop-last part-strings))
-        rear-parts (get-rear-armor (last part-strings))]
-    (assoc {:mech mech-id} PARTS (concat front-parts rear-parts))))
-    ;(map (part-string->part part-strings))))
+  (if (> (count mech-string) 30)
+    (let [mech-id (take 6 mech-string)
+          part-string (subs mech-string 6)
+          part-strings (str/split part-string #"(?<=[p-w])")
+          front-parts (map part-string->part (drop-last part-strings))
+          rear-parts (get-rear-armor (last part-strings))]
+      (assoc {:mech mech-id} PARTS (concat front-parts rear-parts)))
+  (throw (IllegalArgumentException. "A minimal string is at least 30 characters long."))))
